@@ -462,6 +462,19 @@
     #panel.smallMode .bondBox{ height:200px; }
 
     #xapiBase{ display:none!important; }
+
+    /* ✅ Back to main menu (fixed bottom-centre, outside stage area) */
+    #mainMenuBtn{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 10000;
+      padding: 10px 14px;
+      font-size: 12px;
+      border-radius: 999px;
+      white-space:nowrap;
+    }
   </style>
 </head>
 
@@ -662,6 +675,9 @@
     </div>
   </div>
 
+  <!-- ✅ Back to the main menu button (centre bottom) -->
+  <button id="mainMenuBtn" type="button" aria-label="Back to the main menu">⬅ Back to the main menu</button>
+
   <!-- Sound kit (generic) -->
   <script>
     let audioCtx = null;
@@ -729,15 +745,29 @@
       const stage = $("stage");
       const wrap  = $("stageWrap");
       const panel = $("panel");
+      const viewport = document.querySelector(".viewport");
+      const menuBtn = $("mainMenuBtn");
 
       const vv = window.visualViewport;
       const vw = (vv ? vv.width : window.innerWidth);
       const vh = (vv ? vv.height : window.innerHeight);
 
+      // Reserve space so the fixed bottom button never blocks the stage
+      let reserve = 0;
+      try{
+        if(menuBtn){
+          reserve = (menuBtn.getBoundingClientRect().height || 0) + 18;
+        }
+      }catch(e){}
+      try{
+        if(viewport) viewport.style.paddingBottom = reserve + "px";
+      }catch(e){}
+
       const designW = 920, designH = 560;
       const margin = 10;
 
-      const scale = Math.min((vw - margin*2)/designW, (vh - margin*2)/designH);
+      const usableH = Math.max(200, (vh - reserve));
+      const scale = Math.min((vw - margin*2)/designW, (usableH - margin*2)/designH);
       const s = Math.max(0.24, scale);
 
       wrap.style.width  = (designW * s) + "px";
@@ -945,6 +975,15 @@
     window.addEventListener("DOMContentLoaded", ()=>{
       lockScroll();
 
+      // Back to main menu
+      (function(){
+        const MAIN_MENU_URL = "https://limkimsze-maker.github.io/P3_Mental_Sum_Challenge/";
+        const btn = $("mainMenuBtn");
+        if(btn){
+          btn.addEventListener("click", ()=>{ window.location.href = MAIN_MENU_URL; });
+        }
+      })();
+
       // ✅ Sound by default (resume on first interaction)
       sessionStorage.setItem("UFCO-audio-unlocked","1");
       (function(){
@@ -981,4 +1020,3 @@
   <script src="https://limkimsze-maker.github.io/assets/nav.js"></script>
 </body>
 </html>
-
